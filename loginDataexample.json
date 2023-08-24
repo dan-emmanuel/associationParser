@@ -1,0 +1,19 @@
+{
+  "roles": [
+      "lcb.user",
+      "lca.association"
+  ],
+  "enabled": true,
+  "mustChangePassword": false,
+  "_id": "5e6f8453e0344269efd172ec",
+  "email": "reouven.bokobza@gmail.com",
+  "civilite": "Monsieur",
+  "nom": "bokobza",
+  "prenom": "réouven",
+  "externalized": {
+      "idNir": "5e6f8453fab7a26b30d39d3d"
+  },
+  "updatedAt": "2023-08-23T14:55:53.467Z",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTI4MTUzMTIsInVzZXIiOnsicm9sZXMiOlsibGNiLnVzZXIiLCJsY2EuYXNzb2NpYXRpb24iXSwiZW5hYmxlZCI6dHJ1ZSwibXVzdENoYW5nZVBhc3N3b3JkIjpmYWxzZSwiX2lkIjoiNWU2Zjg0NTNlMDM0NDI2OWVmZDE3MmVjIiwiZW1haWwiOiJyZW91dmVuLmJva29iemFAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmEkMDUkclpXOWFpeDJaTDF5WkE1aHZzMzdSLjk4c1FQU3JvaVBpQmh1YVZCLllxT1pDUk9LUG4udFMiLCJjaXZpbGl0ZSI6Ik1vbnNpZXVyIiwibm9tIjoiYm9rb2J6YSIsInByZW5vbSI6InLDqW91dmVuIiwiZXh0ZXJuYWxpemVkIjp7ImlkTmlyIjoiNWU2Zjg0NTNmYWI3YTI2YjMwZDM5ZDNkIn0sInVwZGF0ZWRBdCI6IjIwMjMtMDgtMjNUMTQ6NTU6NTMuNDY3WiJ9LCJpYXQiOjE2OTI4MTE3MTJ9.kWCplfFDJ3xSt6Kd611aixwv5QO5ca94hqYFlmZHZhw",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTI4OTgxMTIsInVzZXIiOnsiZW1haWwiOiJyZW91dmVuLmJva29iemFAZ21haWwuY29tIiwicmVmcmVzaFRva2VuIjoiMmo1YmlYVEJQR0tJdU5ZWFpXSGlRc1Myb0lVSG5nbTBmbDRHakZ2czl1TWQ3SXY0YkxqOXBaN1BOQjJ2QjZ5WG1GbVMxWXltZjNkcXFzWmVsdWcyZU1HY0htN1hMYU9GekNYOE1qSGRvTmZwUndEYWdweUE4VWxLV0p4eWdJNlFhZU53Z0lDOUZmUVNoN2xEb3gxczM5cUFxenl4cXh4Y1ROTUVVNXlFMHdjd04zWlZJVUFKYzRlNjRiVHBaWU9Ha1VUZHdDQ05FWWFaeUN3SXZMUlRLMXlIeThualBka1dCQmVuM0U0UVZHSjlWQ2lyS1FtNmZsTGozQ3VLY0NhQyJ9LCJpYXQiOjE2OTI4MTE3MTJ9.SOOvrCkrrRSCh7b8ujvIqz0pYNy7lNuJpwf-pxn5X94"
+}
