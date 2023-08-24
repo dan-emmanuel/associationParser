@@ -2,11 +2,10 @@ import { subventions } from './subventions';
 import fs from "fs";
 import path from "path";
 import { stringify } from "csv-stringify";
-
+import { Logger } from "./logger";
 type AnyDict = { [key: string]: any };
 let arraysStorage: AnyDict
-const deepTraverse = (obj: AnyDict) => {
-  console.log(obj);
+const deepTraverse = (obj: AnyDict, arrayKey?: string) => {
 
   const objEntries = Object.entries(obj);
 
@@ -14,12 +13,19 @@ const deepTraverse = (obj: AnyDict) => {
     if (!!value) {
       if (Array.isArray(value)) {
         arraysStorage?.[key] || (arraysStorage[key] = []);
+        value.forEach(element => {
+          deepTraverse(value, key)
+        });
       }
 
       if (typeof value === "object") {
-        arraysStorage?.[key] || (arraysStorage[key] = []);
-
+        if (typeof key === "string") {
+          arraysStorage?.[key] || (arraysStorage[key] = []);         
+        }
         deepTraverse(value);
+        const keyToPusInto = arrayKey || key;
+
+        arraysStorage[keyToPusInto].push(value);
       }
     }
 
@@ -29,6 +35,7 @@ const deepTraverse = (obj: AnyDict) => {
 
 
 export async function aggregateParser(jsonFilePath: string): Promise<void> {
+  const logger = new Logger("aggregateParser");
   try {
     arraysStorage = {
       subventions: [],
@@ -36,14 +43,9 @@ export async function aggregateParser(jsonFilePath: string): Promise<void> {
     const outputDirectory = path.join(__dirname, "outputs/explodedData");
     const fs = require("fs");
 
-    fs.readdir(outputDirectory, (err: any, files: any) => {
-      if (err) throw err;
 
-      for (const file of files) {
-        fs.unlink(path.join(outputDirectory, file), (err: any) => {
-          if (err) throw err;
-        });
-      }
+    fs.readdirSync(outputDirectory).forEach((file: any) => {
+      fs.unlinkSync(path.join(outputDirectory, file));
     });
 
     fs.mkdirSync(outputDirectory, { recursive: true });
@@ -56,9 +58,17 @@ export async function aggregateParser(jsonFilePath: string): Promise<void> {
       arraysStorage.subventions.push(item);
       deepTraverse(item);
     }
-    console.log(arraysStorage);
 
-    console.log("Done");
+    //write one JSON file per key of arraysStorage in the output directory
+    for (let key in arraysStorage) {
+      const filePath = path.join(outputDirectory, `${key}.json`);
+      logger.info(`Writing ${filePath}`);
+
+      fs.writeFileSync(filePath, JSON.stringify(arraysStorage[key], null, 2));
+    }
+
+
+    logger.verbose("Done");
   } catch (error) {
     throw error;
   }
