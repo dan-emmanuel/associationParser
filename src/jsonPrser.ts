@@ -1,122 +1,94 @@
+import fs from "fs";
 import path from "path";
-import fs from 'fs';
-import { google, sheets_v4 } from 'googleapis';
-import { createObjectCsvWriter } from 'csv-writer';
+import { stringify } from "csv-stringify";
 
-interface MyObject {
-    [key: string]: MyObject | number | string | boolean | null;
-}
+type AnyDict = { [key: string]: any };
 
-let possibilitiesArray: MyObject[] = [];
+let arraysStorage: { [key: string]: any[] } = {};
 
-const  writeObjToCSV = (obj: MyObject, index: number) =>{
-  const csvParsedPath = path.join(__dirname, 'outputs/csvParsed');
-  objectParser(obj)
-  fs.mkdirSync(csvParsedPath, { recursive: true });
-    const csvWriter = createObjectCsvWriter({
-        path: `${csvParsedPath}csvParsedPath_${index}.csv`,
-        header: [
-            { id: 'key', title: 'KEY' },
-            { id: 'value', title: 'VALUE' }
-        ]
-    });
-
-    const records = Object.keys(obj).map(key => ({ key, value: obj[key] }));
-    csvWriter.writeRecords(records);
-}
-
-const  processObject = (obj: MyObject) =>{
-    Object.keys(obj).forEach(key => {
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-            possibilitiesArray.push(obj[key] as MyObject);
-            const currentIndex = possibilitiesArray.length - 1;
-            obj[key] = currentIndex;
-            writeObjToCSV(obj[key] as MyObject, currentIndex);
-            processObject(obj[key] as MyObject);
-        }
-    });
-}
-
-const objectParser = (object:any)=>{
-    import fs from 'fs';
-
-interface PubfundingMetadata { /* ... */ }
-
-// Recursive function to process the JSON object
-function processObject(obj: any, parentArray?: any[]): any {
-  if (Array.isArray(obj)) {
-    const newArray: any[] = [];
-    for (const item of obj) {
-      newArray.push(processObject(item, newArray));
-    }
-    return newArray;
-  } else if (typeof obj === 'object' && obj !== null) {
-    const newObj: any = {};
-    for (const key in obj) {
-      newObj[key] = processObject(obj[key]);
-    }
-    if (parentArray) {
-      const index = parentArray.findIndex((element) => JSON.stringify(element) === JSON.stringify(newObj));
-      if (index !== -1) {
-        return index;
-      } else {
-        parentArray.push(newObj);
-        return parentArray.length - 1;
-      }
-    }
-    return newObj;
+function processArray(array: any[], key: string): string {
+  if (!arraysStorage[key]) {
+    arraysStorage[key] = [];
   }
-  return obj;
+  let indexes: number[] = [];
+  for (let obj of array) {
+    arraysStorage[key].push(obj);
+    indexes.push(arraysStorage[key].length - 1);
+  }
+  return indexes.join(",");
 }
 
-    // Function to convert array of arrays into CSV
-    function arraysToCsv(arrays: any[]): string {
-    const csvLines = arrays.map((arr) => arr.map((val) => JSON.stringify(val)).join(',')).join('\n');
-    return csvLines;
+function deepTraverse(obj: AnyDict): void {
+  for (let key in obj) {
+    if (Array.isArray(obj[key])) {
+      if (obj[key].length > 0 && typeof obj[key][0] === "string") {
+        obj[key] = obj[key].join(",");
+      } else {
+        obj[key] = processArray(obj[key], key);
+      }
+    } else if (typeof obj[key] === "object" && obj[key] !== null) {
+      if (!arraysStorage[key]) {
+        arraysStorage[key] = [];
+      }
+      arraysStorage[key].push(obj[key]);
+      obj[key] = arraysStorage[key].length - 1;
+      deepTraverse(obj[key]);
+    } else {
+      console.log(key);
+    }
+  }
+}
+
+async function saveToFiles(directory: string): Promise<void> {
+  const dateStr = new Date().toISOString().split("T")[0].replace(/-/g, "");
+  for (let arrayName in arraysStorage) {
+    const filePathJSON = path.join(directory, `${dateStr}-${arrayName}.json`);
+    const filePathCSV = path.join(directory, `${dateStr}-${arrayName}.csv`);
+    fs.writeFileSync(
+      filePathJSON,
+      JSON.stringify(arraysStorage[arrayName], null, 2)
+    );
+
+    const csvString = await new Promise<string>((resolve, reject) => {
+      stringify(arraysStorage[arrayName], { header: true }, (err, output) => {
+        if (err) return reject(err);
+        resolve(output as string);
+      });
+    });
+
+    fs.writeFileSync(filePathCSV, csvString);
+  }
+}
+
+export async function aggregateParser(jsonFilePath: string): Promise<void> {
+  try {
+    const outputDirectory = path.join(__dirname, "outputs/explodedData");
+    const fs = require("fs");
+
+    fs.readdir(outputDirectory, (err: any, files: any) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlink(path.join(outputDirectory, file), (err: any) => {
+          if (err) throw err;
+        });
+      }
+    });
+
+    fs.mkdirSync(outputDirectory, { recursive: true });
+
+    const jsonContent = fs.readFileSync(jsonFilePath, "utf-8");
+    const pubfundingMetadataArray: AnyDict[] = JSON.parse(jsonContent);
+
+    arraysStorage = {};
+
+    for (let item of pubfundingMetadataArray) {
+      deepTraverse(item);
     }
 
-    function scrapAndStore(metadata: PubfundingMetadata[]): void {
-    const processedData = processObject(metadata);
-    const csvData = arraysToCsv(processedData);
-
-    fs.writeFileSync('output.csv', csvData, 'utf-8');
-    }
-
-// Example usage
-scrapAndStore(metadata);
-
+    await saveToFiles(outputDirectory);
+    console.log("Done");
+  } catch (error) {
+    throw error;
+  }
 }
-
-
-// const  writeToGoogleSheets = (auth: any, data: any[][]) =>{
-//     const sheets = google.sheets('v4');
-//     const spreadsheetId = 'YOUR_SPREADSHEET_ID'; // Replace with your spreadsheet ID
-
-//     sheets.spreadsheets.values.append({
-//         auth: auth,
-//         spreadsheetId: spreadsheetId,
-//         range: 'A1', // Adjust this as per your requirement
-//         valueInputOption: 'RAW',
-//         insertDataOption: 'INSERT_ROWS',
-//         resource: {
-//             values: data // Your data array here
-//         }
-//     }, (err, res) => {
-//         if (err) return console.log(`The API returned an error: ${err}`);
-//         console.log(`Appended: ${res?.data?.updates?.updatedCells} cells`);
-//     });
-// }
-
-export const  agregateParser = (filePath: string)=> {
-    const jsonContent = fs.readFileSync(filePath, 'utf-8');
-    const jsonData = JSON.parse(jsonContent) as MyObject;
-
-    processObject(jsonData);
-
-    // Assuming possibilitiesArray contains 2D arrays for Google Sheets
-    // writeToGoogleSheets(auth, possibilitiesArray);
-
-    fs.writeFileSync('output.json', JSON.stringify(jsonData, null, 2));
-}
-
-const auth = new google.auth.OAuth2(/* ... your credentials ... */);

@@ -8,7 +8,7 @@ import { SubventionTable } from "./pubFunding.type";
 import { createObjectCsvWriter } from "csv-writer";
 import { gentPubFundingList } from "./gentPubFundingList";
 import { PubfundingMetadata } from "./PubfundingMetadata";
-import { agregateParser } from "./jsonPrser";
+import { aggregateParser } from "./jsonPrser";
 
 export const gentPubFundingListDetails = async (req: Request, res:Response): Promise<{
   // csvPath: string,
@@ -54,7 +54,7 @@ export const gentPubFundingListDetails = async (req: Request, res:Response): Pro
       zipPath: aggregatedZipFilePath,
     };
 
-    agregateParser(aggregatedJsonFilePath)
+    aggregateParser(aggregatedJsonFilePath);
 
     if(res){
       res.setHeader('Content-Type', 'application/zip');

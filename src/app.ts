@@ -6,6 +6,7 @@ import fastcsv from "fast-csv";
 import { loginFnct } from "./login";
 import { gentPubFundingList } from "./gentPubFundingList";
 import { gentPubFundingListDetails } from "./gentPubFundingListDetails";
+import { aggregateParser } from "./jsonPrser";
 
 const app = express();
 
@@ -15,12 +16,16 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello, Express with TypeScript!");
 });
 
-app.post("/login",loginFnct);
-app.get('/gentPubFundingList',gentPubFundingList);
+app.post("/login", loginFnct);
+app.get("/gentPubFundingList", gentPubFundingList);
 
-app.get('/gentPubFundingListDetails',gentPubFundingListDetails);
+app.get("/gentPubFundingListDetails", gentPubFundingListDetails);
 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+aggregateParser(
+  "/Users/danazoulay/Desktop/asso_scrapper/src/outputs/aggregatedData/24-7-2023-aggregatedData.json"
+);
