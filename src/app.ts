@@ -1,8 +1,4 @@
 import express, { Request, Response } from "express";
-import { UserSingleton } from "./user"
-import axios from "axios";
-import fs from "fs";
-import fastcsv from "fast-csv";
 import { loginFnct } from "./login";
 import { gentPubFundingList } from "./gentPubFundingList";
 import { gentPubFundingListDetails } from "./gentPubFundingListDetails";
