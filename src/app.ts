@@ -21,12 +21,9 @@ app.get("/", (req: Request, res: Response) => {
 
 app.post("/login", async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
-
     const loginResult: boolean = await loginFnct(req.body);
     if (loginResult) {
       const details = await gentPubFundingListDetails(req, res);
-      res.json(details);
     } else {
 
       res.status(401).json({ error: 'Unauthorized' });

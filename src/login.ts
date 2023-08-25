@@ -6,10 +6,11 @@ import { Logger } from "./logger";
 
 const logger = new Logger("login");
 
-export const loginFnct = async (req?: Request<{}, {}, LoginDto>, res?: Response, loginData?: LoginDto): Promise<boolean> => {
+export const loginFnct = async (req: Request<{}, {}, LoginDto> | LoginDto, res?: Response): Promise<boolean> => {
   try {
     const lecompteAssoUrlLogin = "https://lecompteasso.associations.gouv.fr/gw/auth-server/login";
-    const dataToSend = loginData || req?.body;
+    const dataToSend = ((req as Request<{}, {}, LoginDto>)?.body) || req;
+    console.log({ dataToSend });
 
     const loginResponse: AxiosResponse = await axios.post(lecompteAssoUrlLogin, dataToSend, {
       headers: { "Content-Type": "application/json" },
@@ -25,12 +26,12 @@ export const loginFnct = async (req?: Request<{}, {}, LoginDto>, res?: Response,
   }
 }
 
-const returnHandler = (loginResponse: AxiosResponse, req?: Request, res?: Response): boolean => {
+const returnHandler = (loginResponse: AxiosResponse, req?: Request | LoginDto, res?: Response): boolean => {
   if (loginResponse.status === 200) {
     const userData = loginResponse.data;
     UserSingleton.getInstance(userData);
 
-    if (req && res) {
+    if (res) {
       res.json(userData);
     }
     return true;
