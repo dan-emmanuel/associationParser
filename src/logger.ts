@@ -35,7 +35,6 @@ export class Logger {
           }
 
           const toPrint = `${timestamp} [${level.toUpperCase()}][${this.context}]: ${message}`
-          console.log(toPrint);
 
           return `${colorFunc(toPrint)}`;
         })
