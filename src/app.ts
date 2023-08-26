@@ -6,6 +6,7 @@ import { gentPubFundingListDetails } from "./gentPubFundingListDetails";
 import { aggregateParser } from "./jsonPrser";
 import { GoogleDriveManager } from "./GoogleDriveClient";
 import { Logger } from "./logger";  // Assuming Logger is in the same directory
+import { deleteAllContent } from "./deletecontent";
 
 const logger = new Logger("mainLogger");
 const app = express();
@@ -35,6 +36,14 @@ app.post("/exportToDayData", async (req: Request, res: Response) => {
       logger.info(`gdriver initialized`);
       const sentFiles = await driveManager.uploadFolderAndCreateSheet(aggregate.outputDirectory);
       logger.info(`sentFiles: ${sentFiles}`);
+      const agregateDataPath = path.join(__dirname, "outputs/aggregatedData");
+      const explodedDataaPath = path.join(__dirname, "outputs/explodedData");
+      const tableDataDataPath = path.join(__dirname, "outputs/tableData");
+
+      deleteAllContent(agregateDataPath)
+      deleteAllContent(explodedDataaPath)
+      deleteAllContent(tableDataDataPath)
+
       res.status(200).json({ sentFiles });
     } else {
 

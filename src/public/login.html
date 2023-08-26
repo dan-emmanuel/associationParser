@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Login</title>
+    <title>Dailly Exporter</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -12,16 +12,18 @@
     class="bg-primary d-flex justify-content-center align-items-center vh-100"
   >
     <form id="login-form" class="bg-white p-5 rounded">
-      <h1>exporter</h1>
+      <h1>Dailly Exporter</h1>
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
         <input type="text" class="form-control" id="username" required />
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" required />
+        <input type="text" class="form-control" id="password" required />
       </div>
-      <button type="submit" class="btn btn-primary" id="loginBtn">generate today's export</button>
+      <button type="submit" class="btn btn-primary" id="loginBtn">
+        generate today's export
+      </button>
     </form>
 
     <!-- Error Modal -->
@@ -80,6 +82,14 @@
           </div>
           <div class="modal-body">
             <p>Your job is done. Go and check Google Drive.</p>
+            <p>
+              <strong>Folder:</strong>
+              <a id="folder-link" target="_blank">Open Folder</a>
+            </p>
+            <p>
+              <strong>Sheet:</strong>
+              <a id="sheet-link" target="_blank">Open Sheet</a>
+            </p>
           </div>
         </div>
       </div>
@@ -115,7 +125,10 @@
           }
 
           // Show success modal
-          console.log(data);
+          const apiResponse = data.sentFiles
+          console.log(Object.keys(apiResponse));
+          document.getElementById("folder-link").href = apiResponse.urlFolder;
+          document.getElementById("sheet-link").href = apiResponse.urlSheet;
           new bootstrap.Modal(document.getElementById("successModal")).show();
         } catch (error) {
           setTimeout(() => {}, 5000);
