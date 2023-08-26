@@ -7,7 +7,7 @@
     "start": "tsc && node dist/app.js",
     "start:dev": "nodemon --delay 1000ms --exec ts-node src/app.ts",
     "start:debug": "nodemon --delay 1000ms --exec ts-node src/app.ts",
-    "build": "tsc"
+    "build": "tsc && node dist/app.js"
   },
   "author": "",
   "license": "ISC",
