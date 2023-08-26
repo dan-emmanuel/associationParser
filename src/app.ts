@@ -4,7 +4,10 @@ import { loginFnct } from "./login";
 import { gentPubFundingList } from "./gentPubFundingList";
 import { gentPubFundingListDetails } from "./gentPubFundingListDetails";
 import { aggregateParser } from "./jsonPrser";
+import { GoogleDriveManager } from "./GoogleDriveClient";
+import { Logger } from "./logger";  // Assuming Logger is in the same directory
 
+const logger = new Logger("mainLogger");
 const app = express();
 
 app.use(express.json());
@@ -19,11 +22,20 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello, Express with TypeScript!");
 });
 
-app.post("/login", async (req: Request, res: Response) => {
+app.post("/exportToDayData", async (req: Request, res: Response) => {
   try {
     const loginResult: boolean = await loginFnct(req.body);
+    logger.info(`loginResult: ${loginResult}`);
     if (loginResult) {
-      const details = await gentPubFundingListDetails(req, res);
+      const details = await gentPubFundingListDetails(req);
+      logger.info(`details: ${JSON.stringify(details)}`);
+      const aggregate = await aggregateParser(details.jsonPath);
+      logger.info(`aggregate: ${aggregate}`);
+      const driveManager = new GoogleDriveManager();
+      logger.info(`gdriver initialized`);
+      const sentFiles = await driveManager.uploadFolderAndCreateSheet(aggregate.outputDirectory);
+      logger.info(`sentFiles: ${sentFiles}`);
+      res.status(200).json({ sentFiles });
     } else {
 
       res.status(401).json({ error: 'Unauthorized' });

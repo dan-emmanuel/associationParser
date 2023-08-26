@@ -10,7 +10,7 @@ import { gentPubFundingList } from "./gentPubFundingList";
 import { PubfundingMetadata } from "./PubfundingMetadata";
 import { aggregateParser } from "./jsonPrser";
 
-export const gentPubFundingListDetails = async (req: Request, res:Response): Promise<{
+export const gentPubFundingListDetails = async (req?: Request, res?: Response): Promise<{
   // csvPath: string,
   jsonPath: string,
   zipPath: string,
@@ -53,9 +53,6 @@ export const gentPubFundingListDetails = async (req: Request, res:Response): Pro
       jsonPath: aggregatedJsonFilePath,
       zipPath: aggregatedZipFilePath,
     };
-
-    aggregateParser(aggregatedJsonFilePath);
-
     if(res){
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename=data.zip');

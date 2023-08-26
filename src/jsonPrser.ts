@@ -3,6 +3,7 @@ import path from "path";
 import { stringify } from "csv-stringify";
 import { Logger } from "./logger";
 import archiver from "archiver";
+import { GoogleDriveManager } from "./GoogleDriveClient";
 type AnyDict = { [key: string]: any };
 let arraysStorage: AnyDict
 const logger = new Logger("aggregateParser");
@@ -93,7 +94,10 @@ const createZip = (sourceDir: string, outputFilePath: string): Promise<void> => 
 };
 
 
-export async function aggregateParser(jsonFilePath: string): Promise<void> {
+export async function aggregateParser(jsonFilePath: string): Promise<{
+  zipFilePath: string,
+  outputDirectory: string,
+}> {
   try {
     arraysStorage = {
       subventions: [],
@@ -142,7 +146,11 @@ export async function aggregateParser(jsonFilePath: string): Promise<void> {
 
     await createZip(outputDirectory, zipFilePath);
 
-    logger.verbose("Done");
+    logger.verbose("zipcreated");
+    return {
+      zipFilePath,
+      outputDirectory,
+    }
   } catch (error) {
     throw error;
   }

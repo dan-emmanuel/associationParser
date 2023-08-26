@@ -12,7 +12,7 @@
     class="bg-primary d-flex justify-content-center align-items-center vh-100"
   >
     <form id="login-form" class="bg-white p-5 rounded">
-      <h1>Login</h1>
+      <h1>exporter</h1>
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
         <input type="text" class="form-control" id="username" required />
@@ -21,7 +21,7 @@
         <label for="password" class="form-label">Password</label>
         <input type="password" class="form-control" id="password" required />
       </div>
-      <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
+      <button type="submit" class="btn btn-primary" id="loginBtn">generate today's export</button>
     </form>
 
     <!-- Error Modal -->
@@ -102,7 +102,7 @@
         const password = document.getElementById("password").value;
 
         try {
-          const response = await fetch(`${serverUrl}/login`, {
+          const response = await fetch(`${serverUrl}/exportToDayData`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
@@ -115,7 +115,7 @@
           }
 
           // Show success modal
-
+          console.log(data);
           new bootstrap.Modal(document.getElementById("successModal")).show();
         } catch (error) {
           setTimeout(() => {}, 5000);
