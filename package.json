@@ -26,7 +26,6 @@
     "fast-csv": "^4.3.6",
     "google-auth-library": "^9.0.0",
     "googleapis": "^126.0.0",
-    "tsc": "^2.0.4",
     "winston": "^3.10.0"
   },
   "nodemonConfig": {
