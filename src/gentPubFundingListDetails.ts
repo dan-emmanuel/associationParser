@@ -31,7 +31,7 @@ export const gentPubFundingListDetails = async (req?: Request, res?: Response): 
     // Collect all subventions metadata
     const allSubventionsMetadata:PubfundingMetadata[] = await subventionsMetdatas;
     // Create a directory to store the aggregated data
-    const aggregatedDataDirectory = path.join(__dirname, 'outputs/aggregatedData');
+    const aggregatedDataDirectory = path.join(__dirname, "..", 'outputs/aggregatedData');
     fs.mkdirSync(aggregatedDataDirectory, { recursive: true });
     // Create a timestamp string (dd-mm-yyyy)
     const date = new Date();

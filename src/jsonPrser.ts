@@ -102,7 +102,7 @@ export async function aggregateParser(jsonFilePath: string): Promise<{
     arraysStorage = {
       subventions: [],
     };
-    const outputDirectory = path.join(__dirname, "outputs/explodedData");
+    const outputDirectory = path.join(__dirname, "..", "outputs/explodedData");
     if (fs.existsSync(outputDirectory)) {
       fs.readdirSync(outputDirectory).forEach((file: any) => {
         fs.unlinkSync(path.join(outputDirectory, file));

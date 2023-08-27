@@ -15,7 +15,7 @@ app.use(express.json());
 
 // Serve login HTML page
 app.get('/login', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, 'public/login.html'));
+  res.sendFile(path.join(__dirname, "..", 'public/login.html'));
 });
 
 // Your existing routes
@@ -36,9 +36,9 @@ app.post("/exportToDayData", async (req: Request, res: Response) => {
       logger.info(`gdriver initialized`);
       const sentFiles = await driveManager.uploadFolderAndCreateSheet(aggregate.outputDirectory);
       logger.info(`sentFiles: ${sentFiles}`);
-      const agregateDataPath = path.join(__dirname, "outputs/aggregatedData");
-      const explodedDataaPath = path.join(__dirname, "outputs/explodedData");
-      const tableDataDataPath = path.join(__dirname, "outputs/tableData");
+      const agregateDataPath = path.join(__dirname, "..", "outputs/aggregatedData")
+      const explodedDataaPath = path.join(__dirname, "..", "outputs/explodedData")
+      const tableDataDataPath = path.join(__dirname, "..", "outputs/tableData")
 
       deleteAllContent(agregateDataPath)
       deleteAllContent(explodedDataaPath)

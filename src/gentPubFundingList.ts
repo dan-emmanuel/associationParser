@@ -21,7 +21,7 @@ export const gentPubFundingList = async ( res:Response|undefined =undefined): Pr
     });
     const tableData:SubventionTable[] = dataResponse.data;
     const jsonData = JSON.stringify(tableData, null, 2);
-    const outputDirectory = path.join(__dirname, 'outputs/tableData');
+    const outputDirectory = path.join(__dirname, "..", 'outputs/tableData');
     fs.mkdirSync(outputDirectory, { recursive: true });
     //create a time string dd-mm-yyyyy
     const date = new Date();

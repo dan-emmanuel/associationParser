@@ -16,7 +16,7 @@ export class GoogleDriveManager {
   };
 
   constructor() {
-    const serviceAccountPathFile = path.join(__dirname, 'clientSecretGdrive.json');
+    const serviceAccountPathFile = path.join(__dirname, "..", 'clientSecretGdrive.json');
     const { client_email, private_key } = JSON.parse(fs.readFileSync(serviceAccountPathFile, 'utf-8'));
     this.auth = new google.auth.JWT(
       client_email,
