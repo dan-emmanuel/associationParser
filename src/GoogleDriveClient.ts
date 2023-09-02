@@ -40,9 +40,16 @@ export class GoogleDriveManager {
   private async readCSV(filePath: string): Promise<any[]> {
     return new Promise((resolve, reject) => {
       const rows: any[] = [];
+      let isFirstRow = true;
       fs.createReadStream(filePath)
         .pipe(csv())
-        .on('data', (row) => rows.push(Object.values(row)))
+        .on('data', (row) => {
+          if (isFirstRow) {
+            rows.push(Object.keys(row));  // Add the headers
+            isFirstRow = false;
+          }
+          rows.push(Object.values(row));  // Add the row values
+        })
         .on('end', () => resolve(rows))
         .on('error', reject);
     });
@@ -121,19 +128,19 @@ export class GoogleDriveManager {
           range: `${sheetName}!A1`,
           values: data
         });
-      } else {
-        const media = fs.createReadStream(filePath);
-        await this.drive.files.create({
-          requestBody: {
-            name: file,
-            parents: [newFolderId]
-          },
-          media: {
-            mimeType: 'application/octet-stream',
-            body: media
-          }
-        });
       }
+      const media = fs.createReadStream(filePath);
+      await this.drive.files.create({
+        requestBody: {
+          name: file,
+          parents: [newFolderId]
+        },
+        media: {
+          mimeType: 'application/octet-stream',
+          body: media
+        }
+      });
+
     });
 
     await Promise.all(uploadPromises);
