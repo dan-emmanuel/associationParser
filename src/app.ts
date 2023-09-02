@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 
 // Serve login HTML page
-app.get('/login', (req: Request, res: Response) => {
+app.get('/dayLyExporter', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "..", 'public/login.html'));
 });
 
