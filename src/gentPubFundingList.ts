@@ -14,7 +14,7 @@ export const gentPubFundingList = async ( res:Response|undefined =undefined): Pr
 }> => {
   try {
     // Continue with the scraping and data processing
-    const dataResponse = await axios.get('https://lecompteasso.associations.gouv.fr/gw/rds-server/subventions?fields=code%20libelle%20type_projet%20campagne_exercice%20instructeurs%20dispositif&dispositif=&typeFinanceur=&niveauTerritorial=&zoneTerritoriale=&depAssociation=Alpes-Maritimes&regionAssociation=Provence-Alpes-C%C3%B4te%20d%27Azur&populate=instructeurs.service.bo%20instructeurs.service.dispositifs.sous_dispositifs%20dispositif.sous_dispositifs', {
+    const dataResponse = await axios.get('https://lecompteasso.associations.gouv.fr/gw/rds-server/subventions?fields=code%20libelle%20type_projet%20campagne_exercice%20instructeurs%20dispositif&dispositif=&typeFinanceur=&niveauTerritorial=&zoneTerritoriale=&populate=instructeurs.service.bo%20instructeurs.service.dispositifs.sous_dispositifs%20dispositif.sous_dispositifs', {
       headers: {
         'X-Access-Token': UserSingleton.getInstance().token,
       },

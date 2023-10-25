@@ -13,7 +13,7 @@ const app = express();
 
 app.use(express.json());
 
-// Serve login HTML page
+// Serve dayLyExporter HTML page
 app.get('/dayLyExporter', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "..", 'public/login.html'));
 });
@@ -53,6 +53,9 @@ app.post("/exportToDayData", async (req: Request, res: Response) => {
     res.status(500).json({ error: 'An error occurred' });
   }
 });
+
+app.post("/login", loginFnct);
+
 
 app.get("/gentPubFundingList", gentPubFundingList);
 app.get("/gentPubFundingListDetails", gentPubFundingListDetails);

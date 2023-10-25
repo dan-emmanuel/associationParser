@@ -3,6 +3,9 @@ import path from "path";
 import { stringify } from "csv-stringify";
 import { Logger } from "./logger";
 import archiver from "archiver";
+import Papa from 'papaparse';
+
+
 import { GoogleDriveManager } from "./GoogleDriveClient";
 type AnyDict = { [key: string]: any };
 let arraysStorage: AnyDict
@@ -46,25 +49,33 @@ const deepTraverse = (obj: AnyDict, arrayKey?: string) => {
   }
 }
 const writeCSV = (data: AnyDict[], filePath: string): Promise<void> => {
-  // Replace newline characters in each string field of each object.
-  const sanitizedData = data.map(obj => {
-    const sanitizedObj: AnyDict = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === 'string') {
-        sanitizedObj[key] = value.replace(/\n/g, ' ');  // Replace newline with space
-      } else {
-        sanitizedObj[key] = value;
+  return new Promise<void>((resolve, reject) => {
+    // Find all unique keys in the data array
+    const allKeys = new Set<string>();
+    for (const obj of data) {
+      for (const key of Object.keys(obj)) {
+        allKeys.add(key);
       }
     }
-    return sanitizedObj;
-  });
 
-  return new Promise<void>((resolve, reject) => {
-    stringify(sanitizedData, { header: true }, (err, output) => {
+    // Create a "template" object that has all possible fields set to null
+    const template: AnyDict = {};
+    Array.from(allKeys).forEach((key) => {
+      template[key] = null;
+    });
+
+    // Add the template object to the beginning of the data array
+    // This ensures that all possible columns exist in the resulting CSV
+    const completeData = data.map((obj) => ({ ...template, ...obj }));
+
+    // Use PapaParse to convert the objects to CSV
+    const csv = Papa.unparse(completeData);
+
+    // Write the CSV data to disk
+    fs.writeFile(filePath, csv, (err) => {
       if (err) {
         reject(err);
       } else {
-        fs.writeFileSync(filePath, output);
         resolve();
       }
     });

@@ -26,6 +26,7 @@
     "fast-csv": "^4.3.6",
     "google-auth-library": "^9.0.0",
     "googleapis": "^126.0.0",
+    "papaparse": "^5.4.1",
     "winston": "^3.10.0"
   },
   "nodemonConfig": {
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@types/csv-stringify": "^3.1.0",
+    "@types/papaparse": "^5.3.8",
     "ncp": "^2.0.0",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
