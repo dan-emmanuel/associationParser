@@ -9,23 +9,47 @@
     />
   </head>
   <body
-    class="bg-primary d-flex justify-content-center align-items-center vh-100"
+    class="bg-primary d-flex justify-content-around align-items-center vh-100"
   >
-    <form id="login-form" class="bg-white p-5 rounded">
-      <h1>Dailly Exporter</h1>
-      <div class="mb-3">
-        <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username" required />
-      </div>
-      <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input type="text" class="form-control" id="password" required />
-      </div>
-      <button type="submit" class="btn btn-primary" id="loginBtn">
-        generate today's export
-      </button>
-    </form>
+    <div class="bg-white p-5 rounded">
+      <form id="lecompteAssoForm">
+        <h2>Le compte asso</h2>
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" required />
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="text" class="form-control" id="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="lecompteAssoRunner">
+          generate today's export
+        </button>
+      </form>
+    
+    </div>
 
+    <div class="bg-white p-5 rounded">
+      <h2>Appel a projets</h2>
+          <form id="appelAprjetoForm">
+
+          <button type="submit" class="btn btn-primary" id="appelAProjetRunner">
+          generate today's export
+        </button>
+        </form>
+    </div>
+    <div class="bg-white p-5 rounded">
+      <h2>Fundit</h2>
+          <button type="submit" class="btn btn-primary" id="FundItRuner">
+          generate today's export
+        </button>
+    </div>
+     <div class="bg-white p-5 rounded">
+      <h2>FSE</h2>
+          <button type="submit" class="btn btn-primary" id="FSERunner">
+          generate today's export
+        </button>
+    </div>
     <!-- Error Modal -->
     <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -95,55 +119,101 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      const form = document.getElementById("login-form");
-      const spinnerModal = new bootstrap.Modal(
-        document.getElementById("spinnerModal")
-      );
-      const serverUrl = `${window.location.protocol}//${window.location.host}`;
 
-      form.addEventListener("submit", async function (e) {
-        e.preventDefault();
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+      <!-- lecompteassorunner -->
+      <script>
+        const form = document.getElementById("lecompteAssoForm");
+        const spinnerModal = new bootstrap.Modal(
+          document.getElementById("spinnerModal")
+        );
+        const serverUrl = `${window.location.protocol}//${window.location.host}`;
 
-        spinnerModal.show();
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-        const email = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
+          spinnerModal.show();
 
-        try {
-          const response = await fetch(`${serverUrl}/exportToDayData`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          });
+          const email = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
 
-          const data = await response.json();
+          try {
+            const response = await fetch(`${serverUrl}/lecompteAsso/exportToDayData`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
 
-          if (response.status !== 200) {
-            throw new Error(data.error);
+            const data = await response.json();
+
+            if (response.status !== 200) {
+              throw new Error(data.error);
+            }
+
+            // Show success modal
+            const apiResponse = data.sentFiles;
+            console.log(Object.keys(apiResponse));
+            document.getElementById("folder-link").href = apiResponse.urlFolder;
+            document.getElementById("sheet-link").href = apiResponse.urlSheet;
+            new bootstrap.Modal(document.getElementById("successModal")).show();
+          } catch (error) {
+            setTimeout(() => {}, 5000);
+            console.log(error);
+
+            // Hide spinner
+
+            // Show error modal
+            document.getElementById("errorMessage").textContent = error.message;
+            new bootstrap.Modal(document.getElementById("errorModal")).show();
+          } finally {
+            // Hide the spinner modal
+            spinnerModal.hide();
           }
+        });
+      </script>
+      <!-- appelaprojet -->
+        <script>
+        const appelAprjetoForm = document.getElementById("appelAprjetoForm");
+        const appelApreojetSpinner = new bootstrap.Modal(
+          document.getElementById("spinnerModal")
+        );
+        appelAprjetoForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-          // Show success modal
-          const apiResponse = data.sentFiles
-          console.log(Object.keys(apiResponse));
-          document.getElementById("folder-link").href = apiResponse.urlFolder;
-          document.getElementById("sheet-link").href = apiResponse.urlSheet;
-          new bootstrap.Modal(document.getElementById("successModal")).show();
-        } catch (error) {
-          setTimeout(() => {}, 5000);
-          console.log(error);
+          spinnerModal.show();
 
-          // Hide spinner
+          try {
+            const response = await fetch(`${serverUrl}/appelaprojets/exportToDayData`, {
+              method: "GET",
+              headers: { "Content-Type": "application/json" }
+            });
 
-          // Show error modal
-          document.getElementById("errorMessage").textContent = error.message;
-          new bootstrap.Modal(document.getElementById("errorModal")).show();
-        } finally {
-          // Hide the spinner modal
-          spinnerModal.hide();
-        }
-      });
-    </script>
+            // const data = await response.json();
+
+            // if (response.status !== 200) {
+            //   throw new Error(data.error);
+            // }
+
+            // // Show success modal
+            // const apiResponse = data.sentFiles;
+            // console.log(Object.keys(apiResponse));
+            // document.getElementById("folder-link").href = apiResponse.urlFolder;
+            // document.getElementById("sheet-link").href = apiResponse.urlSheet;
+            new bootstrap.Modal(document.getElementById("successModal")).show();
+          } catch (error) {
+            setTimeout(() => {}, 5000);
+            console.log(error);
+
+            // Hide spinner
+
+            // Show error modal
+            document.getElementById("errorMessage").textContent = error.message;
+            new bootstrap.Modal(document.getElementById("errorModal")).show();
+          } finally {
+            // Hide the spinner modal
+            spinnerModal.hide();
+          }
+        });
+      </script>
   </body>
 </html>

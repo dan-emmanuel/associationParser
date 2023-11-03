@@ -1,12 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { stringify } from "csv-stringify";
 import { Logger } from "./logger";
 import archiver from "archiver";
 import Papa from 'papaparse';
-
-
-import { GoogleDriveManager } from "./GoogleDriveClient";
 type AnyDict = { [key: string]: any };
 let arraysStorage: AnyDict
 const logger = new Logger("aggregateParser");
@@ -18,6 +14,7 @@ const deepTraverse = (obj: AnyDict, arrayKey?: string) => {
   for (let [key, value] of objEntries) {
     if (!!value) {
       if (Array.isArray(value)) {
+
         if (typeof key === "string") {
           arraysStorage?.[key] || (arraysStorage[key] = []);
         }
@@ -36,7 +33,7 @@ const deepTraverse = (obj: AnyDict, arrayKey?: string) => {
 
       } else if (typeof value === "object") {
         if (typeof key === "string") {
-          arraysStorage?.[key] || (arraysStorage[key] = []);         
+          arraysStorage?.[key] || (arraysStorage[key] = []);
         }
         deepTraverse(value);
         const keyToPusInto = arrayKey || key;
@@ -105,7 +102,7 @@ const createZip = (sourceDir: string, outputFilePath: string): Promise<void> => 
 };
 
 
-export async function aggregateParser(jsonFilePath: string): Promise<{
+export async function aggregateParser(jsonFilePath: string, outputDirPath: string): Promise<{
   zipFilePath: string,
   outputDirectory: string,
 }> {
@@ -113,7 +110,7 @@ export async function aggregateParser(jsonFilePath: string): Promise<{
     arraysStorage = {
       subventions: [],
     };
-    const outputDirectory = path.join(__dirname, "..", "outputs/explodedData");
+    const outputDirectory = path.join(outputDirPath, "explodedData");
     if (fs.existsSync(outputDirectory)) {
       fs.readdirSync(outputDirectory).forEach((file: any) => {
         fs.unlinkSync(path.join(outputDirectory, file));
@@ -123,6 +120,7 @@ export async function aggregateParser(jsonFilePath: string): Promise<{
     fs.mkdirSync(outputDirectory, { recursive: true });
 
     const jsonContent = fs.readFileSync(jsonFilePath, "utf-8");
+
     const pubfundingMetadataArray: AnyDict[] = JSON.parse(jsonContent);
 
 
@@ -151,13 +149,13 @@ export async function aggregateParser(jsonFilePath: string): Promise<{
       logger.info(`Writing ${csvFilePath}`);
       await writeCSV(arraysStorage[key], csvFilePath);
     }
-    const zipFilePath = path.join(__dirname, `outputs/explodedData/${timeStamp}-explodedData.zip`);
+    const zipFilePath = path.join(outputDirPath, `explodedData/${timeStamp}-explodedData.zip`);
 
     logger.info(`Creating ZIP archive ${zipFilePath}`);
 
     await createZip(outputDirectory, zipFilePath);
 
-    logger.verbose("zipcreated");
+    logger.info("zipcreated");
     return {
       zipFilePath,
       outputDirectory,

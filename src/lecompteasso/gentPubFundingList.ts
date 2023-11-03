@@ -2,12 +2,17 @@ import axios from "axios";
 import UserSingleton from "./user";
 import path from "path";
 import archiver from 'archiver';
-import  { Request, Response } from "express";
+import { Request, Response } from "express";
 import fs from "fs";
 import { SubventionTable } from "./pubFunding.type";
 import { createObjectCsvWriter } from "csv-writer";
+import { outputDirPath } from "./outputDirPath";
+import { Logger } from "../logger";  // Assuming Logger is in the same directory
 
-export const gentPubFundingList = async ( res:Response|undefined =undefined): Promise<{
+const logger = new Logger("gentPubFundingList");
+
+
+export const gentPubFundingList = async (res: Response | undefined = undefined): Promise<{
   csvPath: string,
   jsonPath: string,
   zipPath: string,
@@ -19,9 +24,9 @@ export const gentPubFundingList = async ( res:Response|undefined =undefined): Pr
         'X-Access-Token': UserSingleton.getInstance().token,
       },
     });
-    const tableData:SubventionTable[] = dataResponse.data;
+    const tableData: SubventionTable[] = dataResponse.data;
     const jsonData = JSON.stringify(tableData, null, 2);
-    const outputDirectory = path.join(__dirname, "..", 'outputs/tableData');
+    const outputDirectory = path.join(outputDirPath, 'tableData');
     fs.mkdirSync(outputDirectory, { recursive: true });
     //create a time string dd-mm-yyyyy
     const date = new Date();
@@ -44,7 +49,7 @@ export const gentPubFundingList = async ( res:Response|undefined =undefined): Pr
     });
     // Write the data to the CSV file
     await csvWriter.writeRecords(tableData);
-    
+
     // Create a zip archive
     const zipFilePath = path.join(outputDirectory, `${timeStamp}-tableData.zip`);
     const zipStream = fs.createWriteStream(zipFilePath);
@@ -53,7 +58,7 @@ export const gentPubFundingList = async ( res:Response|undefined =undefined): Pr
 
     // Add JSON file to the archive
     archive.append(jsonData, { name: `${timeStamp}-tableData.json` });
-    
+
     // Add csv file to the archive
     archive.append(fs.createReadStream(path.join(outputDirectory, `${timeStamp}-tableData.csv`)), { name: `${timeStamp}-tableData.csv` });
 
@@ -61,11 +66,11 @@ export const gentPubFundingList = async ( res:Response|undefined =undefined): Pr
     archive.finalize();
 
     // Set response headers for the zip archive
-    if(res){
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename=data.zip');
-    // Pipe the zip archive to the response
-    fs.createReadStream(zipFilePath).pipe(res);
+    if (res) {
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', 'attachment; filename=data.zip');
+      // Pipe the zip archive to the response
+      fs.createReadStream(zipFilePath).pipe(res);
     }
     return {
       csvPath: path.join(outputDirectory, `${timeStamp}-tableData.csv`),
@@ -73,8 +78,8 @@ export const gentPubFundingList = async ( res:Response|undefined =undefined): Pr
       zipPath: path.join(outputDirectory, `${timeStamp}-tableData.zip`),
     };
   } catch (error) {
-    console.error(error);
-    if(res)res.status(500).json({ message: 'Internal server error' });
+    logger.error(error);
+    if (res) res.status(500).json({ message: 'Internal server error' });
     throw new Error('Internal server error');
 
   }

@@ -1,10 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import { Logger } from "../logger";  // Assuming Logger is in the same directory
+const logger = new Logger("deleteAllContent");
 
 export const deleteAllContent = (dirPath: string) => {
   // Check if the path exists
   if (!fs.existsSync(dirPath)) {
-    console.log("Directory path doesn't exist.");
+    logger.info("Directory path doesn't exist.");
     return;
   }
 

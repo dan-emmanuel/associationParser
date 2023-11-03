@@ -8,7 +8,8 @@ import fs from "fs";
 import { SubventionTable } from "./pubFunding.type";
 import { gentPubFundingList } from "./gentPubFundingList";
 import { PubfundingMetadata } from "./PubfundingMetadata";
-import { Logger } from "./logger";
+import { Logger } from "../logger";
+import { outputDirPath } from "./outputDirPath";
 
 const logger = new Logger("gentPubFundingListDetails");
 
@@ -18,9 +19,9 @@ export const gentPubFundingListDetails = async (req?: Request, res?: Response): 
   jsonPath: string,
   zipPath: string,
 }> => {
-  
-  try{
-    const {jsonPath} = await gentPubFundingList()
+
+  try {
+    const { jsonPath } = await gentPubFundingList()
     const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'))
     const codes = jsonData.map((item: SubventionTable) => item.code)
     logger.info(` number of subvs : ${codes.length}`)
@@ -30,12 +31,12 @@ export const gentPubFundingListDetails = async (req?: Request, res?: Response): 
       try {
 
         const dataResponse = await axios.get(`https://lecompteasso.associations.gouv.fr/gw/rds-server/subventions/${code}?populate=instructeurs.service.dispositifs.sous_dispositifs%20instructeurs.service.bo%20dispositif.sous_dispositifs`, {
-        headers: {
-          'X-Access-Token': UserSingleton.getInstance().token,
-        },
-      });
+          headers: {
+            'X-Access-Token': UserSingleton.getInstance().token,
+          },
+        });
 
-      return dataResponse.data
+        return dataResponse.data
       } catch (error: any) {
         errorCodes.push(error.config.url)
         return null
@@ -69,12 +70,17 @@ export const gentPubFundingListDetails = async (req?: Request, res?: Response): 
       allSubventionsMetadata.push(...subventionsMetdatasChunkFiltered);
     }
     // Create a directory to store the aggregated data
-    const errorPath = path.join(__dirname, "..", 'outputs/errors');
-
+    const errorPath = path.join(outputDirPath, "errors");
+    // if folder does not exists create it
+    if (!fs.existsSync(errorPath)) {
+      fs.mkdirSync(errorPath);
+    }
     const pathFileError = path.join(errorPath, `errorsCodes.json`);
 
+
+
     fs.writeFileSync(pathFileError, JSON.stringify(errorCodes, null, 2));
-    const aggregatedDataDirectory = path.join(__dirname, "..", 'outputs/aggregatedData');
+    const aggregatedDataDirectory = path.join(outputDirPath, "aggregatedData");
     fs.mkdirSync(aggregatedDataDirectory, { recursive: true });
     // Create a timestamp string (dd-mm-yyyy)
     const date = new Date();
@@ -96,21 +102,21 @@ export const gentPubFundingListDetails = async (req?: Request, res?: Response): 
       jsonPath: aggregatedJsonFilePath,
       zipPath: aggregatedZipFilePath,
     };
-    if(res){
+    if (res) {
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename=data.zip');
       // Pipe the zip archive to the response
       fs.createReadStream(aggregatedZipFilePath).pipe(res);
-      }
+    }
     return result;
-  }catch(error){
-      console.error(error);
-      if(res)res.status(500).json({ message: 'Internal server error' });
-      throw new Error('Internal server error');
-  
-  }
-  
+  } catch (error) {
+    logger.error(error);
+    if (res) res.status(500).json({ message: 'Internal server error' });
+    throw new Error('Internal server error');
 
-  
+  }
+
+
+
 
 };

@@ -47,19 +47,24 @@ export class Logger {
   }
 
   // Define methods for each log level
-  error(message: string): void {
+  error(message: any): void {
+    // if message is notr a string stringify it
+    if (typeof message !== "string") message = JSON.stringify(message, null, 2);
     this.logger.error(message);
   }
 
-  warn(message: string): void {
+  warn(message: any): void {
+    if (typeof message !== "string") message = JSON.stringify(message, null, 2);
     this.logger.warn(message);
   }
 
-  info(message: string): void {
+  info(message: any): void {
+    if (typeof message !== "string") message = JSON.stringify(message, null, 2);
     this.logger.info(message);
   }
 
-  verbose(message: string): void {
+  verbose(message: any): void {
+    if (typeof message !== "string") message = JSON.stringify(message, null, 2);
     this.logger.verbose(message); // Use the custom "success" level
   }
 }
