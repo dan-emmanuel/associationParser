@@ -82,6 +82,22 @@ const writeCSV = (data: AnyDict[], filePath: string): Promise<void> => {
 
 const createZip = (sourceDir: string, outputFilePath: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
+    //count number of files to place into the archive
+    let numberOfFiles = 0;
+    const countFiles = (dir: string) => {
+      const files = fs.readdirSync(dir);
+      files.forEach((file) => {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+          countFiles(filePath);
+        } else if (stat.isFile()) {
+          numberOfFiles++;
+        }
+      });
+    };
+    countFiles(sourceDir);
+    logger.info(`number of files to place into the archive: ${numberOfFiles}`);
     const output = fs.createWriteStream(outputFilePath);
     const archive = archiver('zip', {
       zlib: { level: 9 }, // Compression level
@@ -90,7 +106,12 @@ const createZip = (sourceDir: string, outputFilePath: string): Promise<void> => 
     output.on('close', () => {
       resolve();
     });
-
+    archive.on('progress', ({ entries, fs }) => {
+      logger.info({
+        entries,
+        fs
+      })
+    })
     archive.on('error', (err) => {
       reject(err);
     });
@@ -103,7 +124,6 @@ const createZip = (sourceDir: string, outputFilePath: string): Promise<void> => 
 
 
 export async function aggregateParser(jsonFilePath: string, outputDirPath: string): Promise<{
-  zipFilePath: string,
   outputDirectory: string,
 }> {
   try {
@@ -133,6 +153,7 @@ export async function aggregateParser(jsonFilePath: string, outputDirPath: strin
 
     //write one JSON file per key of arraysStorage in the output directory
     for (let key in arraysStorage) {
+
       const jsonFilePath = path.join(outputDirectory, `${timeStamp}-${key}.json`);
       const csvFilePath = path.join(outputDirectory, `${timeStamp}-${key}.csv`);
 
@@ -149,15 +170,11 @@ export async function aggregateParser(jsonFilePath: string, outputDirPath: strin
       logger.info(`Writing ${csvFilePath}`);
       await writeCSV(arraysStorage[key], csvFilePath);
     }
-    const zipFilePath = path.join(outputDirPath, `explodedData/${timeStamp}-explodedData.zip`);
 
-    logger.info(`Creating ZIP archive ${zipFilePath}`);
 
-    await createZip(outputDirectory, zipFilePath);
 
     logger.info("zipcreated");
     return {
-      zipFilePath,
       outputDirectory,
     }
   } catch (error) {

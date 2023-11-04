@@ -4,7 +4,7 @@ import { loginFnct } from "./lecompteasso/login";
 import { gentPubFundingList } from "./lecompteasso/gentPubFundingList";
 import { gentPubFundingListDetails } from "./lecompteasso/gentPubFundingListDetails";
 import { aggregateParser } from "./jsonPrser";
-import { GoogleDriveManager } from "./lecompteasso/GoogleDriveClient";
+import { FolderMetadataParents, GoogleDriveManager } from "./GoogleDriveClient";
 import { Logger } from "./logger";  // Assuming Logger is in the same directory
 import { deleteAllContent } from "./lecompteasso/deletecontent";
 import { outputDirPath as lecomptAssoOutPutDirPath } from "./lecompteasso/outputDirPath";
@@ -28,6 +28,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.post("/lecompteAsso/exportToDayData", async (req: Request, res: Response) => {
+
   try {
     const loginResult: boolean = await loginFnct(req.body);
     logger.info(`loginResult: ${loginResult}`);
@@ -36,7 +37,7 @@ app.post("/lecompteAsso/exportToDayData", async (req: Request, res: Response) =>
       logger.info(`details: ${JSON.stringify(details)}`);
       const aggregate = await aggregateParser(details.jsonPath, lecomptAssoOutPutDirPath);
       logger.info(`aggregate: ${aggregate}`);
-      const driveManager = new GoogleDriveManager();
+      const driveManager = new GoogleDriveManager(FolderMetadataParents.LECOMPTEASSO);
       logger.info(`gdriver initialized`);
       const sentFiles = await driveManager.uploadFolderAndCreateSheet(aggregate.outputDirectory);
       logger.info(`sentFiles: ${sentFiles}`);
@@ -62,8 +63,16 @@ app.get("/appelaprojets/exportToDayData", async (req: Request, res: Response) =>
   const { jsonPath } = await dataScrapper()
   logger.info(`jsonPath: ${jsonPath}`);
   const aggregate = await aggregateParser(jsonPath, appelAProjetOutPutDirPath);
-
-  res.status(200).json({ message: "ok" });
+  logger.info(`aggregate: ${aggregate}`);
+  const driveManager = new GoogleDriveManager(FolderMetadataParents.APPELAPROJET);
+  logger.info(`gdriver initialized`);
+  const sentFiles = await driveManager.uploadFolderAndCreateSheet(aggregate.outputDirectory);
+  logger.info(`sentFiles: ${sentFiles}`);
+  const brutData = path.join(appelAProjetOutPutDirPath, "brutData")
+  const explodedDataaPath = path.join(appelAProjetOutPutDirPath, "explodedData")
+  deleteAllContent(brutData)
+  deleteAllContent(explodedDataaPath)
+  res.status(200).json({ sentFiles });
 })
 
 app.post("/login", loginFnct);

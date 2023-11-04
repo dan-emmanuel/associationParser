@@ -11,7 +11,7 @@
   <body
     class="bg-primary d-flex justify-content-around align-items-center vh-100"
   >
-    <div class="bg-white p-5 rounded">
+    <div class="bg-white p-5 rounded h-50">
       <form id="lecompteAssoForm">
         <h2>Le compte asso</h2>
         <div class="mb-3">
@@ -29,7 +29,7 @@
     
     </div>
 
-    <div class="bg-white p-5 rounded">
+    <div class="bg-white p-5 rounded h-50 d-flex flex-column justify-content-between">
       <h2>Appel a projets</h2>
           <form id="appelAprjetoForm">
 
@@ -38,18 +38,20 @@
         </button>
         </form>
     </div>
-    <div class="bg-white p-5 rounded">
+    <!-- funditRunner -->
+    <!-- <div class="bg-white p-5 rounded">
       <h2>Fundit</h2>
           <button type="submit" class="btn btn-primary" id="FundItRuner">
           generate today's export
         </button>
-    </div>
-     <div class="bg-white p-5 rounded">
+    </div> -->
+    <!-- FSE RUNNER -->
+     <!-- <div class="bg-white p-5 rounded">
       <h2>FSE</h2>
           <button type="submit" class="btn btn-primary" id="FSERunner">
           generate today's export
         </button>
-    </div>
+    </div> -->
     <!-- Error Modal -->
     <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -78,6 +80,7 @@
       role="dialog"
       aria-labelledby="spinnerModalLabel"
       aria-hidden="true"
+      data-bs-backdrop="static"
     >
       <div class="modal-dialog modal-dialog-centered" style="margin-top: 5%">
         <div
@@ -188,17 +191,17 @@
               headers: { "Content-Type": "application/json" }
             });
 
-            // const data = await response.json();
+            const data = await response.json();
 
-            // if (response.status !== 200) {
-            //   throw new Error(data.error);
-            // }
+            if (response.status !== 200) {
+              throw new Error(data.error);
+            }
 
-            // // Show success modal
-            // const apiResponse = data.sentFiles;
-            // console.log(Object.keys(apiResponse));
-            // document.getElementById("folder-link").href = apiResponse.urlFolder;
-            // document.getElementById("sheet-link").href = apiResponse.urlSheet;
+            // Show success modal
+            const apiResponse = data.sentFiles;
+            console.log(Object.keys(apiResponse));
+            document.getElementById("folder-link").href = apiResponse.urlFolder;
+            document.getElementById("sheet-link").href = apiResponse.urlSheet;
             new bootstrap.Modal(document.getElementById("successModal")).show();
           } catch (error) {
             setTimeout(() => {}, 5000);

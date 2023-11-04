@@ -3,19 +3,30 @@ import { JWT } from 'google-auth-library';
 import fs from 'fs';
 import path from 'path';
 import csv from 'csv-parser';
-import { Logger } from "../logger";
+import { Logger } from "./logger";
 
+export enum FolderMetadataParents {
+  LECOMPTEASSO = '1U9bIxgFFdFSMI3UrZJuita1m_zA3Rnho',
+  APPELAPROJET = '1urOwlB2Q907oWo2qn6BLfwWgx0p5YnkU'
+}
+
+
+interface FolderMetadata {
+  mimeType: string;
+  parents: FolderMetadataParents[];
+}
 export class GoogleDriveManager {
   private logger = new Logger("GoogleDriveManager");
   private drive: any;
   private sheets: any;
   private auth: JWT;
-  private folderMetadata = {
+  private folderMetadata: FolderMetadata = {
     mimeType: 'application/vnd.google-apps.folder',
-    parents: ['1U9bIxgFFdFSMI3UrZJuita1m_zA3Rnho']
+    parents: []
   };
 
-  constructor() {
+  constructor(folderMetadataParent: FolderMetadataParents) {
+    this.folderMetadata.parents = [folderMetadataParent];
     const serviceAccountPathFile = path.join(__dirname, "..", 'clientSecretGdrive.json');
     const { client_email, private_key } = JSON.parse(fs.readFileSync(serviceAccountPathFile, 'utf-8'));
     this.auth = new google.auth.JWT(

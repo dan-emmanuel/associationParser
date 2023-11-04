@@ -14,11 +14,14 @@ export async function scrapePaginationUrls(): Promise<string[]> {
     const $ = cheerio.load(response.data);
     const paginationDiv = $('#pagination');
     const listsurls: string[] = [];
-    paginationDiv.find('a').each((index, element) => {
-      const url = $(element).attr('href');
-      if (url) listsurls.push(url);
-    });
-    listsurls[0] = `${baseUrl}/0`;
+    const anchors = paginationDiv.find('a')
+    const lastAnchor = anchors[anchors.length - 1];
+    const lasturl = $(lastAnchor).attr('href');
+    const lastUrlSplitedUrl = lasturl?.split('/')
+    const lastPageNumber = parseInt(lastUrlSplitedUrl?.[lastUrlSplitedUrl.length - 1] || "0");
+    for (let index = 0; index <= lastPageNumber; index += 9) {
+      listsurls.push(`${baseUrl}/${index}`);
+    }
     return listsurls;
   } catch (error) {
     logger.error(error);
@@ -94,7 +97,8 @@ async function scrapePage(url: string): Promise<PageData | null> {
 }
 
 export const scrapAllProjectDetails = async (urlsProjet: string[]) => {
-  const projectsDatas = await Promise.all(urlsProjet.map(async (url) => ({
+  const projectsDatas = await Promise.all(urlsProjet.map(async (url, id) => ({
+    projet: id + 1,
     ... await scrapePage(url),
     url
   })));
@@ -108,10 +112,10 @@ export const dataScrapper = async () => {
   const data = await scrapAllProjectDetails(urlsProject);
   const date = new Date();
   const timeStamp = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-  if (!fs.existsSync(path.join(outputDirPath, "BrutData"))) {
-    fs.mkdirSync(path.join(outputDirPath, "BrutData"));
+  if (!fs.existsSync(path.join(outputDirPath, "brutData"))) {
+    fs.mkdirSync(path.join(outputDirPath, "brutData"));
   }
-  const jsonPath = path.join(outputDirPath, `BrutData/${timeStamp}-BrutData.json`);
+  const jsonPath = path.join(outputDirPath, `brutData/${timeStamp}-brutData.json`);
   logger.info(`Writing ${jsonPath}`);
   fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
   return {
